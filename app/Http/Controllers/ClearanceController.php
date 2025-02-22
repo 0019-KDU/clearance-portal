@@ -1,0 +1,311 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Rank;
+use App\Models\User;
+use App\Models\Department;
+use App\Models\Application;
+use Illuminate\Http\Request;
+use App\Models\ApplicationStatus;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
+use Barryvdh\DomPDF\Facade\Pdf as PDF;
+use Illuminate\Support\Facades\Storage;
+
+class ClearanceController extends Controller
+{
+    public function index(Request $request, $departmentId)
+    {
+    
+        // Get the selected rank from the request
+        $selectedRank = $request->input('rank');
+    
+        // Query to fetch ApplicationStatus related to the department
+        $query = ApplicationStatus::where('department_id', $departmentId);
+    
+        // Handle filtering by approved, rejected, or all
+        if ($request->has('approved_requests') && !$request->has('rejected_requests') && !$request->has('all_requests')) {
+            $query->where('status', 'APPROVED');
+        } elseif ($request->has('rejected_requests') && !$request->has('approved_requests') && !$request->has('all_requests')) {
+            $query->where('status', 'REJECTED');
+        } elseif ($request->has('all_requests')) {
+            // Do nothing, show all requests (no extra filter needed)
+        }
+    
+        // Search by name, application ID, or registration number
+        if ($request->filled('search')) {
+            $search = $request->input('search');
+            $query->whereHas('application.user', function($q) use ($search) {
+                $q->where('user_name', 'like', "%{$search}%")
+                ->orWhere('reg_no', 'like', "%{$search}%");
+            })->orWhere('application_id', 'like', "%{$search}%");
+        }
+    
+        // Get the total count of requests
+        $totalRequests = $query->count();
+    
+        // Get the paginated results
+        //$applicationStatuses = $query->with(['application.studentInfo', 'application.user'])->paginate(10);
+            $applicationStatuses = $query->orderBy('created_at', 'desc')  // Order by the most recent
+            ->with(['application.studentInfo', 'application.user',])
+            ->paginate(10);
+
+        // Load the related applications and users
+        $applicationStatuses->load('application.user');
+        $accountSection = Department::where('dep_name', 'Account section')->firstOrFail();
+        // Check if the current department is Enlistment (assuming dep_id 16 is Enlistment)
+        $isEnlistment = $departmentId == 15;
+    
+        // If it's Enlistment, check approval status for each application
+        if ($isEnlistment) {
+            foreach ($applicationStatuses as $status) {
+                $status->allOthersApproved = $this->allOtherDepartmentsApproved($status->application_id, $departmentId);
+            }
+        }
+    
+        return view('Clearance.department', [
+            'applicationStatuses' => $applicationStatuses,
+            'totalRequests' => $totalRequests,
+            'isEnlistment' => $isEnlistment,
+            'departmentId' => $departmentId,
+            'accountSectionDepId' => $accountSection->id, 
+
+        ]);
+    }
+    
+    // When creating or updating ApplicationStatus, include the person name
+    public function updateStatus(Request $request, $departmentId, $statusId)
+    {
+        try {
+            Log::info('Update status request data:', compact('departmentId', 'statusId', 'request'));
+    
+            // Fetch and validate the ApplicationStatus
+            $status = ApplicationStatus::findOrFail($statusId);
+            if ($status->department_id != $departmentId) {
+                return $this->handleError($request, 'Unauthorized action: Department ID mismatch.');
+            }
+    
+            // Validate the status value
+            $statusValue = $request->input('status');
+            if (!in_array($statusValue, ['APPROVED', 'REJECTED'])) {
+                Log::warning('Invalid status value received:', compact('statusValue'));
+                return $this->handleError($request, 'Invalid status selected.');
+            }
+    
+            // Prepare data for update
+            $data = [
+                'status' => $statusValue,
+                'updated_by' => Auth::id(),
+                'reason' => $statusValue === 'REJECTED' ? $request->input('reason') : null,
+            ];
+    
+            // Check for rejection reason
+            if ($statusValue === 'REJECTED' && empty($data['reason'])) {
+                Log::warning('Rejection reason missing.');
+                return $this->handleError($request, 'Reason is required when rejecting an application.');
+            }
+    
+            // Update within a transaction
+            DB::beginTransaction();
+            $status->update($data);
+            $application = Application::findOrFail($status->application_id);
+            DB::commit();
+    
+            Log::info('Status updated successfully:', compact('statusId'));
+    
+            // Success message
+            $message = $statusValue === 'APPROVED'
+                ? 'Application approved successfully.'
+                : 'Application rejected successfully with reason: ' . $data['reason'];
+    
+            if ($request->expectsJson()) {
+                return response()->json(['success' => true, 'message' => $message]);
+            }
+    
+            return redirect()->route('Clearance.list', ['departmentId' => $departmentId])
+                             ->with('success', $message);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error updating application status:', ['message' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+            return $this->handleError($request, 'An error occurred while updating the status. Please try again.');
+        }
+    }
+    
+    /**
+     * Handle error responses based on request type.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  string  $message
+     * @return \Illuminate\Http\JsonResponse|\Illuminate\Http\RedirectResponse
+     */
+    private function handleError(Request $request, $message)
+    {
+        if ($request->expectsJson()) {
+            return response()->json(['success' => false, 'message' => $message], 400);
+        }
+    
+        return redirect()->back()->with('error', $message);
+    }
+    
+    private function allOtherDepartmentsApproved($applicationId, $currentDepartmentId)
+    {
+        $otherStatuses = ApplicationStatus::where('application_id', $applicationId)
+            ->where('department_id', '!=', $currentDepartmentId)
+            ->pluck('status'); // Only get 'status' values
+    
+        // If there are no other departments, we assume approval is fine (i.e., return true).
+        if ($otherStatuses->isEmpty()) {
+            return true;
+        }
+    
+        // Check if all other department statuses are 'APPROVED'
+        return !$otherStatuses->contains(function ($status) {
+            return $status !== 'APPROVED';
+        });
+    }
+    
+
+    public function generatePdf(Request $request, $departmentId, $statusId)
+{
+    // Validate input
+    $request->validate([
+        'pdf_reason' => 'required|string',
+    ]);
+
+    try {
+        // Fetch the ApplicationStatus
+        $status = ApplicationStatus::findOrFail($statusId);
+
+        // Ensure the department matches
+        if ($status->department_id != $departmentId) {
+            return $this->handleError($request, 'Unauthorized action: Department ID mismatch.');
+        }
+
+        // Prepare data for PDF
+        $data = [
+            'application' => $status->application,
+            'status' => $status,
+            'pdf_reason' => $request->input('pdf_reason'),
+            'user' => Auth::user(),
+        ];
+
+        // Generate PDF using a Blade view
+        $pdf = PDF::loadView('pdf.application', $data);
+
+        // Define the file path
+        $fileName = 'application_' . $status->application_id . '_' . $departmentId . '.pdf';
+        $filePath = 'pdfs/' . $fileName;
+
+        // Save PDF to storage (public disk)
+        Storage::disk('public')->put($filePath, $pdf->output());
+
+        // Update the ApplicationStatus with PDF info
+        $status->update([
+            'pdf_path' => $filePath,
+            'pdf_reason' => $request->input('pdf_reason'),
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'PDF generated and saved successfully.',
+            'pdf_url' => Storage::url($filePath),
+        ]);
+    } catch (\Exception $e) {
+        Log::error('Error generating PDF:', ['message' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+        return $this->handleError($request, 'An error occurred while generating the PDF. Please try again.');
+    }
+}
+
+public function viewHostelPdf($applicationId)
+    {
+        return $this->viewPdf($applicationId, 25); // 25 is the department ID for Hostel
+    }
+
+    public function viewLibraryPdf($applicationId)
+    {
+        return $this->viewPdf($applicationId, 12); // 12 is the department ID for Library
+    }
+
+    private function viewPdf($applicationId, $departmentId)
+    {
+        try {
+            $fileName = "application_{$applicationId}_{$departmentId}.pdf";
+            $filePath = "pdfs/{$fileName}";
+
+            if (!Storage::disk('public')->exists($filePath)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'PDF file not found.',
+                ], 404);
+            }
+
+            // Log the PDF access
+            Log::info("PDF accessed", [
+                'user_id' => Auth::id(),
+                'application_id' => $applicationId,
+                'department_id' => $departmentId,
+                'file_name' => $fileName,
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'pdf_url' => Storage::url($filePath),
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error viewing PDF:', ['message' => $e->getMessage()]);
+            return response()->json([
+                'success' => false,
+                'message' => 'An error occurred while fetching the PDF.',
+            ], 500);
+        }
+    }
+
+    public function getReceipts(Request $request, $applicationId)
+    {
+        try {
+            // Fetch the ApplicationStatus entries for Library and Hostel
+            $libraryStatus = ApplicationStatus::where('application_id', $applicationId)
+                                ->where('department_id', 12)
+                                ->first();
+    
+            $hostelStatus = ApplicationStatus::where('application_id', $applicationId)
+                                ->where('department_id', 25)
+                                ->first();
+    
+            // Debugging output
+            Log::info('Library Status:', ['libraryStatus' => $libraryStatus]);
+            Log::info('Hostel Status:', ['hostelStatus' => $hostelStatus]);
+    
+            if (!$libraryStatus && !$hostelStatus) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No receipt information found for this application.',
+                ], 404);
+            }
+    
+            // Prepare the response data
+            $data = [
+                'library_receipt_path' => $libraryStatus->receipt_path ?? null,
+                'hostel_receipt_path' => $hostelStatus->receipt_path ?? null,
+                'library_receipt_url' => $libraryStatus && $libraryStatus->receipt_path ? Storage::url($libraryStatus->receipt_path) : null,
+                'hostel_receipt_url' => $hostelStatus && $hostelStatus->receipt_path ? Storage::url($hostelStatus->receipt_path) : null,
+            ];
+    
+            Log::info('Receipts Data:', ['data' => $data]);
+    
+            return response()->json([
+                'success' => true,
+                'data' => $data,
+            ]);
+    
+        } catch (\Exception $e) {
+            Log::error('Error fetching receipts:', ['message' => $e->getMessage()]);
+            return response()->json([
+                'success' => false,
+                'message' => 'An error occurred while fetching the receipts.',
+            ], 500);
+        }
+    }
+}

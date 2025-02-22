@@ -113,7 +113,7 @@ use Illuminate\Support\Facades\Storage;
                     <th>Status</th>
                     <th>Reason</th>
                     <th>Updated By</th>
-                    <th>Rank</th> <!-- Existing Rank Column -->
+                    <th>Service Number</th> <!-- Existing Rank Column -->
                     <th>PDF</th> <!-- New PDF Column -->
                     <th>Upload Receipt</th> <!-- New Upload Receipt Column -->
                 </tr>
@@ -132,8 +132,8 @@ use Illuminate\Support\Facades\Storage;
                         </span>
                     </td>
                     <td>{{ $status->reason }}</td>
-                    <td>{{ $status->person_name ?? 'N/A' }}</td>
-                    <td>{{ $status->rank ?? 'N/A' }}</td>
+                    <td>{{ $status->updater->user_name ?? 'N/A' }}</td>
+                    <td>{{ $status->updater->service_number ?? 'N/A' }}</td>
 
                     @if (in_array(strtolower($status->department->dep_name), ['library', 'hostal']))
                     {{-- PDF Column --}}

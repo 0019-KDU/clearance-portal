@@ -75,64 +75,77 @@ class ClearanceController extends Controller
         ]);
     }
     
-    // When creating or updating ApplicationStatus, include the person name
-    public function updateStatus(Request $request, $departmentId, $statusId)
-    {
-        try {
-            Log::info('Update status request data:', compact('departmentId', 'statusId', 'request'));
-    
-            // Fetch and validate the ApplicationStatus
-            $status = ApplicationStatus::findOrFail($statusId);
-            if ($status->department_id != $departmentId) {
-                return $this->handleError($request, 'Unauthorized action: Department ID mismatch.');
-            }
-    
-            // Validate the status value
-            $statusValue = $request->input('status');
-            if (!in_array($statusValue, ['APPROVED', 'REJECTED'])) {
-                Log::warning('Invalid status value received:', compact('statusValue'));
-                return $this->handleError($request, 'Invalid status selected.');
-            }
-    
-            // Prepare data for update
-            $data = [
-                'status' => $statusValue,
-                'updated_by' => Auth::id(),
-                'reason' => $statusValue === 'REJECTED' ? $request->input('reason') : null,
-            ];
-    
-            // Check for rejection reason
-            if ($statusValue === 'REJECTED' && empty($data['reason'])) {
-                Log::warning('Rejection reason missing.');
-                return $this->handleError($request, 'Reason is required when rejecting an application.');
-            }
-    
-            // Update within a transaction
-            DB::beginTransaction();
-            $status->update($data);
-            $application = Application::findOrFail($status->application_id);
-            DB::commit();
-    
-            Log::info('Status updated successfully:', compact('statusId'));
-    
-            // Success message
-            $message = $statusValue === 'APPROVED'
-                ? 'Application approved successfully.'
-                : 'Application rejected successfully with reason: ' . $data['reason'];
-    
-            if ($request->expectsJson()) {
-                return response()->json(['success' => true, 'message' => $message]);
-            }
-    
-            return redirect()->route('Clearance.list', ['departmentId' => $departmentId])
-                             ->with('success', $message);
-        } catch (\Exception $e) {
-            DB::rollBack();
-            Log::error('Error updating application status:', ['message' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
-            return $this->handleError($request, 'An error occurred while updating the status. Please try again.');
-        }
-    }
-    
+       // When creating or updating ApplicationStatus, include the person name
+       public function updateStatus(Request $request, $departmentId, $statusId)
+       {
+           try {
+               Log::info('Update status request data:', compact('departmentId', 'statusId', 'request'));
+       
+               // Fetch and validate the ApplicationStatus
+               $status = ApplicationStatus::findOrFail($statusId);
+               if ($status->department_id != $departmentId) {
+                   return $this->handleError($request, 'Unauthorized action: Department ID mismatch.');
+               }
+       
+               // Validate the status value
+               $statusValue = $request->input('status');
+               if (!in_array($statusValue, ['APPROVED', 'REJECTED'])) {
+                   Log::warning('Invalid status value received:', compact('statusValue'));
+                   return $this->handleError($request, 'Invalid status selected.');
+               }
+       
+               // Retrieve the user's service number
+               $departmentUser = Auth::user();  // Get logged-in department user
+               $serviceNumber = $departmentUser->service_number;
+               // Prepare data for update
+               $data = [
+                   'status' => $statusValue,
+                   'updated_by' => Auth::id(),
+                   'reason' => $statusValue === 'REJECTED' ? $request->input('reason') : null,
+                   'service_number' => $serviceNumber, // Store the service number
+               ];
+       
+               // Check for rejection reason
+               if ($statusValue === 'REJECTED' && empty($data['reason'])) {
+                   Log::warning('Rejection reason missing.');
+                   return $this->handleError($request, 'Reason is required when rejecting an application.');
+               }
+       
+               // Update within a transaction
+               DB::beginTransaction();
+               $status->update($data);
+               $application = Application::findOrFail($status->application_id);
+               DB::commit();
+       
+               Log::info('Status updated successfully:', compact('statusId'));
+       
+               // Log the action
+               Log::info('Application status updated with service number:', [
+                   'application_id' => $status->application_id,
+                   'department_id' => $departmentId,
+                   'status' => $statusValue,
+                   'service_number' => $serviceNumber,
+                   'updated_by' => Auth::id(),
+               ]);
+       
+               // Success message
+               $message = $statusValue === 'APPROVED'
+                   ? 'Application approved successfully.'
+                   : 'Application rejected successfully with reason: ' . $data['reason'];
+       
+               if ($request->expectsJson()) {
+                   return response()->json(['success' => true, 'message' => $message]);
+               }
+       
+               return redirect()->route('Clearance.list', ['departmentId' => $departmentId])
+                                ->with('success', $message);
+           } catch (\Exception $e) {
+               DB::rollBack();
+               Log::error('Error updating application status:', ['message' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+               return $this->handleError($request, 'An error occurred while updating the status. Please try again.');
+           }
+       }
+   
     /**
      * Handle error responses based on request type.
      *

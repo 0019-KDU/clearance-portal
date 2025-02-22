@@ -21,6 +21,7 @@ class ApplicationStatus extends Model
         'created_by',
         'updated_by',
         'receipt_path',
+        'service_number'
     ];
     public function application()
     {

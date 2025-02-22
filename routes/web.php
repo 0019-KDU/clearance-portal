@@ -225,3 +225,7 @@ Route::post('/student/upload-receipt', [StudentDashboardController::class, 'uplo
     Route::get('/clearance/receipts/{applicationId}', [ClearanceController::class, 'getReceipts'])
     ->name('Clearance.getReceipts')
     ->middleware('auth');
+
+    Route::get('/staff/create', [StaffController::class, 'create'])->name('staff.create'); // Show form
+    Route::post('/staff/store', [StaffController::class, 'store'])->name('staff.store');  // Save data
+    

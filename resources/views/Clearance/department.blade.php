@@ -112,12 +112,12 @@
                             <input type="hidden" name="status" value="APPROVED">
                             <button type="submit" class="btn btn-approve">Approve</button>
                         </form>
-                        <button type="button" class="btn btn-decline"
-                            onclick="declineApplication('{{ $status->id }}')">Decline</button>
+                        <!-- Decline Button -->
+                        <button type="button" class="btn btn-decline" onclick="declineApplication('{{ $status->id }}')">Decline</button>
                         @endif
 
                         <!-- Receipt Button (Only Visible for dep_id = 13) -->
-                        @if($status->dep_id == 13)
+                        @if(auth()->user()->dep_id == 13)
                         <div class="receipt-buttons" style="margin-top: 10px;">
                             <button type="button" class="btn btn-receipt"
                                 onclick="seeReceipt('{{ $status->application_id }}')">See Receipt</button>
@@ -125,7 +125,7 @@
                         @endif
                     </div>
 
-
+                    <!-- Receipt Modal -->
                     <div id="receiptModal" class="modal">
                         <div class="modal-content">
                             <span class="close" onclick="closeModal('receiptModal')">&times;</span>
@@ -147,6 +147,26 @@
             </li>
             @endforelse
         </ul>
+    </div>
+</div>
+
+<!-- Decline Reason Modal -->
+<div id="declineModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeModal('declineModal')">&times;</span>
+        <h3>Enter Reason for Declining</h3>
+        <textarea id="declineReason" rows="4" placeholder="Enter reason here..."></textarea>
+        <button id="submitDeclineBtn">Submit</button>
+    </div>
+</div>
+
+<!-- Message Modal for Success/Error -->
+<div id="messageModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeModal('messageModal')">&times;</span>
+        <h3 id="messageTitle"></h3>
+        <p id="messageBody"></p>
+        <button onclick="closeModal('messageModal')">OK</button>
     </div>
 </div>
 
@@ -223,64 +243,66 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 ////////////////////////////////////////////    
-function declineApplication(statusId) {
-    console.log("Decline button clicked for status ID:", statusId);
+let declineStatusId = null;
 
-    var csrfToken = document.querySelector('meta[name="csrf-token"]');
-    if (!csrfToken) {
-        alert("CSRF token not found. Please check your layout file.");
-        return;
+    function declineApplication(statusId) {
+        console.log("Decline button clicked for status ID:", statusId);
+        declineStatusId = statusId;
+        document.getElementById("declineModal").style.display = "block";
     }
 
-    // Prompt the user for the reason
-    var reason = prompt("Please enter the reason for declining:");
-    if (reason == null || reason.trim() === "") {
-        console.log("Decline action cancelled or no reason provided.");
-        return; // Exit if no reason provided
+    function closeModal(modalId) {
+        document.getElementById(modalId).style.display = "none";
     }
 
-    console.log("Reason provided:", reason);
+    function showMessageModal(title, message) {
+        document.getElementById("messageTitle").innerText = title;
+        document.getElementById("messageBody").innerText = message;
+        document.getElementById("messageModal").style.display = "block";
+    }
 
-    // Prepare the data to send
-    var formData = new FormData();
-    formData.append('_token', csrfToken.getAttribute('content'));
-    formData.append('_method', 'PUT');
-    formData.append('status', 'REJECTED');
-    formData.append('reason', reason);
+    document.getElementById("submitDeclineBtn").addEventListener("click", function () {
+        const reason = document.getElementById("declineReason").value.trim();
+        if (reason === "") {
+            showMessageModal("Error", "Please provide a reason for declining.");
+            return;
+        }
 
-    // Make the fetch request
-    fetch(`{{ route('Clearance.update', ['departmentId' => auth()->user()->dep_id, 'statusId' => ':statusId']) }}`
-            .replace(':statusId', statusId), {
+        console.log("Reason provided:", reason);
+
+        var csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+        var formData = new FormData();
+        formData.append('_token', csrfToken);
+        formData.append('_method', 'PUT');
+        formData.append('status', 'REJECTED');
+        formData.append('reason', reason);
+
+        fetch(`{{ route('Clearance.update', ['departmentId' => auth()->user()->dep_id, 'statusId' => ':statusId']) }}`
+                .replace(':statusId', declineStatusId), {
                 method: 'POST',
                 body: formData,
                 headers: {
-                    'X-CSRF-TOKEN': csrfToken.getAttribute('content'),
+                    'X-CSRF-TOKEN': csrfToken,
                     'Accept': 'application/json',
                 }
             })
-        .then(response => {
-            if (!response.ok) {
-                return response.json().then(errData => {
-                    throw new Error(errData.message ||
-                        `Network response was not ok (${response.status})`);
-                });
-            }
-            return response.json();
-        })
-        .then(data => {
-            console.log('Response data:', data);
-            if (data.success) {
-                alert(data.message);
-                location.reload(); // Reload the page
-            } else {
-                alert('Error: ' + (data.message || 'Unknown error occurred'));
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('An error occurred: ' + error.message);
-        });
-}
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showMessageModal("Success", data.message);
+                    setTimeout(() => location.reload(), 2000); // Reload after 2 seconds
+                } else {
+                    showMessageModal("Error", data.message || "Unknown error occurred");
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showMessageModal("Error", "An error occurred: " + error.message);
+            });
+
+        closeModal("declineModal"); // Close the reason input modal
+    });
 
 function generatePdf(statusId) {
     console.log("Generate PDF button clicked for status ID:", statusId);
@@ -417,6 +439,52 @@ window.onclick = function(event) {
     }
 }
 </script>
+
+
+
+<style>
+    /* Modal Styles */
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+    }
+
+    .modal-content {
+        background-color: white;
+        padding: 20px;
+        width: 40%;
+        margin: 10% auto;
+        text-align: center;
+        border-radius: 10px;
+    }
+
+    .close {
+        float: right;
+        font-size: 20px;
+        cursor: pointer;
+    }
+
+    textarea {
+        width: 100%;
+        padding: 10px;
+        margin: 10px 0;
+        resize: none;
+    }
+
+    button {
+        padding: 10px 20px;
+        background-color: green;
+        color: white;
+        border: none;
+        cursor: pointer;
+    }
+</style>
 
 </div>
 @endsection

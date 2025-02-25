@@ -217,10 +217,11 @@
             </li>
             @endif
 
-
-            <a class="nav-button btn btn-success" href="{{ route('staff.create') }}">
+            <li>
+            <a class="nav-button btn " href="{{ route('staff.create') }}">
                 <i class="fas fa-user-plus"></i> Add Staff
             </a>
+            </li>
 
             <li><a class="nav-link logout-btn" href="#"
                     onclick="event.preventDefault(); document.getElementById('logout-form').submit();">

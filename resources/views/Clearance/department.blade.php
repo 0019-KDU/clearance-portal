@@ -136,20 +136,7 @@
         </ul>
     </div>
 </div>
-<!-- Receipt Modal -->
-<div id="receiptModal" class="modal">
-    <div class="modal-content">
-        <span class="close" onclick="closeModal('receiptModal')">&times;</span>
-    <!-- Library Receipt will be loaded here -->
-        <h2>Library Receipt</h2>
-    <div id="libraryReceiptContainer">
-    </div>
-    <!-- Hostel Receipt will be loaded here -->
-        <h2>Hostel Receipt</h2>
-        <div id="hostelReceiptContainer">
-    </div>
-</div>
-                    
+
 <!-- Decline Reason Modal -->
 <div id="declineModal" class="modal">
     <div class="modal-content">
@@ -169,6 +156,22 @@
         <button onclick="closeModal('messageModal')">OK</button>
     </div>
 </div>
+
+<!-- Receipt Modal -->
+<div id="receiptModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeModal('receiptModal')">&times;</span>
+    <!-- Library Receipt will be loaded here -->
+        <h2>Library Receipt</h2>
+    <div id="libraryReceiptContainer">
+    </div>
+    <!-- Hostel Receipt will be loaded here -->
+        <h2>Hostel Receipt</h2>
+        <div id="hostelReceiptContainer">
+    </div>
+</div>
+                    
+
 
 
 <script>

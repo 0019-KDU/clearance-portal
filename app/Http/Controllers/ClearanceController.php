@@ -233,7 +233,7 @@ class ClearanceController extends Controller
 
 public function viewHostelPdf($applicationId)
     {
-        return $this->viewPdf($applicationId, 25); // 25 is the department ID for Hostel
+        return $this->viewPdf($applicationId, 16); // 25 is the department ID for Hostel
     }
 
     public function viewLibraryPdf($applicationId)
@@ -245,15 +245,18 @@ public function viewHostelPdf($applicationId)
     {
         try {
             $fileName = "application_{$applicationId}_{$departmentId}.pdf";
-            $filePath = "pdfs/{$fileName}";
-
+            $filePath = "pdfs/{$fileName}"; // Path relative to storage/app/public/
+    
             if (!Storage::disk('public')->exists($filePath)) {
                 return response()->json([
                     'success' => false,
                     'message' => 'PDF file not found.',
                 ], 404);
             }
-
+    
+            // Generate public URL for the file
+            $pdfUrl = asset("storage/{$filePath}");
+    
             // Log the PDF access
             Log::info("PDF accessed", [
                 'user_id' => Auth::id(),
@@ -261,10 +264,10 @@ public function viewHostelPdf($applicationId)
                 'department_id' => $departmentId,
                 'file_name' => $fileName,
             ]);
-
+    
             return response()->json([
                 'success' => true,
-                'pdf_url' => Storage::url($filePath),
+                'pdf_url' => $pdfUrl,
             ]);
         } catch (\Exception $e) {
             Log::error('Error viewing PDF:', ['message' => $e->getMessage()]);
@@ -274,6 +277,7 @@ public function viewHostelPdf($applicationId)
             ], 500);
         }
     }
+    
 
     public function getReceipts(Request $request, $applicationId)
     {

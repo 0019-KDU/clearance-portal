@@ -113,7 +113,8 @@
                             <button type="submit" class="btn btn-approve">Approve</button>
                         </form>
                         <!-- Decline Button -->
-                        <button type="button" class="btn btn-decline" onclick="declineApplication('{{ $status->id }}')">Decline</button>
+                        <button type="button" class="btn btn-decline"
+                            onclick="declineApplication('{{ $status->id }}')">Decline</button>
                         @endif
 
                         <!-- Receipt Button (Only Visible for dep_id = 13) -->
@@ -125,7 +126,7 @@
                         @endif
                     </div>
 
-                    
+
                 </div>
             </li>
             @empty
@@ -161,92 +162,93 @@
 <div id="receiptModal" class="modal">
     <div class="modal-content">
         <span class="close" onclick="closeModal('receiptModal')">&times;</span>
-    <!-- Library Receipt will be loaded here -->
+        <!-- Library Receipt will be loaded here -->
         <h2>Library Receipt</h2>
-    <div id="libraryReceiptContainer">
-    </div>
-    <!-- Hostel Receipt will be loaded here -->
+        <div id="libraryReceiptContainer">
+        </div>
+        <!-- Hostel Receipt will be loaded here -->
         <h2>Hostel Receipt</h2>
         <div id="hostelReceiptContainer">
+        </div>
     </div>
-</div>
-                    
 
 
 
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-    const allRequestsCheckbox = document.getElementById('allRequests');
-    const approvedRequestsCheckbox = document.getElementById('approvedRequests');
-    const rejectedRequestsCheckbox = document.getElementById('rejectedRequests');
-    const searchInput = document.getElementById('searchRegNo');
-    const applicationItems = document.querySelectorAll('.application-item');
 
-    // Function to filter applications
-    function filterApplications() {
-        const showAll = allRequestsCheckbox.checked;
-        const showApproved = approvedRequestsCheckbox.checked;
-        const showRejected = rejectedRequestsCheckbox.checked;
-        const searchQuery = searchInput.value.trim().toLowerCase();
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const allRequestsCheckbox = document.getElementById('allRequests');
+        const approvedRequestsCheckbox = document.getElementById('approvedRequests');
+        const rejectedRequestsCheckbox = document.getElementById('rejectedRequests');
+        const searchInput = document.getElementById('searchRegNo');
+        const applicationItems = document.querySelectorAll('.application-item');
 
-        applicationItems.forEach(item => {
-            const statusBadge = item.querySelector('.status-badge');
-            const regNoElement = item.querySelector(
-                '.detail-item strong'); // Adjust selector for Reg. No field
-            const status = statusBadge ? statusBadge.textContent.trim().toUpperCase() : null;
-            const regNo = regNoElement ? regNoElement.parentElement.textContent.trim().toLowerCase() :
-                '';
+        // Function to filter applications
+        function filterApplications() {
+            const showAll = allRequestsCheckbox.checked;
+            const showApproved = approvedRequestsCheckbox.checked;
+            const showRejected = rejectedRequestsCheckbox.checked;
+            const searchQuery = searchInput.value.trim().toLowerCase();
 
-            // Determine visibility
-            const matchesStatus =
-                (showAll) ||
-                (showApproved && status === 'APPROVED') ||
-                (showRejected && status === 'REJECTED');
-            const matchesSearch = !searchQuery || regNo.includes(searchQuery);
+            applicationItems.forEach(item => {
+                const statusBadge = item.querySelector('.status-badge');
+                const regNoElement = item.querySelector(
+                    '.detail-item strong'); // Adjust selector for Reg. No field
+                const status = statusBadge ? statusBadge.textContent.trim().toUpperCase() : null;
+                const regNo = regNoElement ? regNoElement.parentElement.textContent.trim()
+                    .toLowerCase() :
+                    '';
 
-            if (matchesStatus && matchesSearch) {
-                item.style.display = 'block';
-            } else {
-                item.style.display = 'none';
+                // Determine visibility
+                const matchesStatus =
+                    (showAll) ||
+                    (showApproved && status === 'APPROVED') ||
+                    (showRejected && status === 'REJECTED');
+                const matchesSearch = !searchQuery || regNo.includes(searchQuery);
+
+                if (matchesStatus && matchesSearch) {
+                    item.style.display = 'block';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        }
+
+        // Event listeners for checkboxes and search input
+        allRequestsCheckbox.addEventListener('change', () => {
+            if (allRequestsCheckbox.checked) {
+                approvedRequestsCheckbox.checked = false;
+                rejectedRequestsCheckbox.checked = false;
             }
+            filterApplications();
         });
-    }
 
-    // Event listeners for checkboxes and search input
-    allRequestsCheckbox.addEventListener('change', () => {
-        if (allRequestsCheckbox.checked) {
-            approvedRequestsCheckbox.checked = false;
-            rejectedRequestsCheckbox.checked = false;
-        }
+        approvedRequestsCheckbox.addEventListener('change', () => {
+            if (approvedRequestsCheckbox.checked) {
+                allRequestsCheckbox.checked = false;
+            }
+            filterApplications();
+        });
+
+        rejectedRequestsCheckbox.addEventListener('change', () => {
+            if (rejectedRequestsCheckbox.checked) {
+                allRequestsCheckbox.checked = false;
+            }
+            filterApplications();
+        });
+
+        searchInput.addEventListener('input', () => {
+            filterApplications();
+        });
+
+        // Initial filter to show all applications
         filterApplications();
     });
 
-    approvedRequestsCheckbox.addEventListener('change', () => {
-        if (approvedRequestsCheckbox.checked) {
-            allRequestsCheckbox.checked = false;
-        }
-        filterApplications();
-    });
-
-    rejectedRequestsCheckbox.addEventListener('change', () => {
-        if (rejectedRequestsCheckbox.checked) {
-            allRequestsCheckbox.checked = false;
-        }
-        filterApplications();
-    });
-
-    searchInput.addEventListener('input', () => {
-        filterApplications();
-    });
-
-    // Initial filter to show all applications
-    filterApplications();
-});
 
 
-
-////////////////////////////////////////////    
-let declineStatusId = null;
+    ////////////////////////////////////////////    
+    let declineStatusId = null;
 
     function declineApplication(statusId) {
         console.log("Decline button clicked for status ID:", statusId);
@@ -264,7 +266,7 @@ let declineStatusId = null;
         document.getElementById("messageModal").style.display = "block";
     }
 
-    document.getElementById("submitDeclineBtn").addEventListener("click", function () {
+    document.getElementById("submitDeclineBtn").addEventListener("click", function() {
         const reason = document.getElementById("declineReason").value.trim();
         if (reason === "") {
             showMessageModal("Error", "Please provide a reason for declining.");
@@ -283,13 +285,13 @@ let declineStatusId = null;
 
         fetch(`{{ route('Clearance.update', ['departmentId' => auth()->user()->dep_id, 'statusId' => ':statusId']) }}`
                 .replace(':statusId', declineStatusId), {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'X-CSRF-TOKEN': csrfToken,
-                    'Accept': 'application/json',
-                }
-            })
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-CSRF-TOKEN': csrfToken,
+                        'Accept': 'application/json',
+                    }
+                })
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
@@ -307,145 +309,152 @@ let declineStatusId = null;
         closeModal("declineModal"); // Close the reason input modal
     });
 
-function generatePdf(statusId) {
-    console.log("Generate PDF button clicked for status ID:", statusId);
+    function generatePdf(statusId) {
+        console.log("Generate PDF button clicked for status ID:", statusId);
 
-    var csrfToken = document.querySelector('meta[name="csrf-token"]');
-    if (!csrfToken) {
-        alert("CSRF token not found. Please check your layout file.");
-        return;
+        var csrfToken = document.querySelector('meta[name="csrf-token"]');
+        if (!csrfToken) {
+            alert("CSRF token not found. Please check your layout file.");
+            return;
+        }
+
+        // Prompt the user for additional information or reasons
+        var pdfReason = prompt("Please enter the reason or information for the PDF:");
+        if (pdfReason == null || pdfReason.trim() === "") {
+            console.log("PDF generation cancelled or no reason provided.");
+            return; // Exit if no reason provided
+        }
+
+        console.log("Reason provided for PDF:", pdfReason);
+
+        // Prepare the data to send
+        var formData = new FormData();
+        formData.append('_token', csrfToken.getAttribute('content'));
+        formData.append('pdf_reason', pdfReason);
+
+        // Make the fetch request
+        fetch(`{{ route('Clearance.generatePdf', ['departmentId' => auth()->user()->dep_id, 'statusId' => ':statusId']) }}`
+                .replace(':statusId', statusId), {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-CSRF-TOKEN': csrfToken.getAttribute('content'),
+                        'Accept': 'application/json',
+                    }
+                })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(errData => {
+                        throw new Error(errData.message ||
+                            `Network response was not ok (${response.status})`);
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Response data:', data);
+                if (data.success) {
+                    alert(data.message);
+                    // Optionally, provide a link to view the PDF
+                    // location.reload(); // Reload the page if needed
+                } else {
+                    alert('Error: ' + (data.message || 'Unknown error occurred'));
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred: ' + error.message);
+            });
     }
 
-    // Prompt the user for additional information or reasons
-    var pdfReason = prompt("Please enter the reason or information for the PDF:");
-    if (pdfReason == null || pdfReason.trim() === "") {
-        console.log("PDF generation cancelled or no reason provided.");
-        return; // Exit if no reason provided
+    function viewGeneratedPdf(applicationId, departmentId) {
+        console.log("Fetching PDF for Application:", applicationId, "Department:", departmentId);
+
+        fetch(`/clearance/pdf/${departmentId === 25 ? 'hostel' : 'library'}/${applicationId}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    window.open(data.pdf_url, '_blank');
+                } else {
+                    alert("PDF not found.");
+                }
+            })
+            .catch(error => console.error("Error fetching PDF:", error));
     }
 
-    console.log("Reason provided for PDF:", pdfReason);
 
-    // Prepare the data to send
-    var formData = new FormData();
-    formData.append('_token', csrfToken.getAttribute('content'));
-    formData.append('pdf_reason', pdfReason);
+    function seeReceipt(applicationId) {
+        console.log("See Receipt button clicked for application ID:", applicationId);
 
-    // Make the fetch request
-    fetch(`{{ route('Clearance.generatePdf', ['departmentId' => auth()->user()->dep_id, 'statusId' => ':statusId']) }}`
-            .replace(':statusId', statusId), {
-                method: 'POST',
-                body: formData,
+        // Make the fetch request to get receipt paths
+        fetch(`{{ route('Clearance.getReceipts', ['applicationId' => ':applicationId']) }}`.replace(':applicationId',
+                applicationId), {
+                method: 'GET',
                 headers: {
-                    'X-CSRF-TOKEN': csrfToken.getAttribute('content'),
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
                     'Accept': 'application/json',
                 }
             })
-        .then(response => {
-            if (!response.ok) {
-                return response.json().then(errData => {
-                    throw new Error(errData.message ||
-                        `Network response was not ok (${response.status})`);
-                });
-            }
-            return response.json();
-        })
-        .then(data => {
-            console.log('Response data:', data);
-            if (data.success) {
-                alert(data.message);
-                // Optionally, provide a link to view the PDF
-                // location.reload(); // Reload the page if needed
-            } else {
-                alert('Error: ' + (data.message || 'Unknown error occurred'));
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('An error occurred: ' + error.message);
-        });
-}
-
-function viewGeneratedPdf(applicationId, departmentId) {
-    console.log("View PDF button clicked for application ID:", applicationId, "and department ID:", departmentId);
-
-    // Construct the correct file URL directly
-    const fileUrl = `/storage/pdfs/application_${applicationId}_${departmentId}.pdf`;
-
-    // Open the file in a new tab
-    window.open(fileUrl, '_blank');
-}
-
-function seeReceipt(applicationId) {
-    console.log("See Receipt button clicked for application ID:", applicationId);
-
-    // Make the fetch request to get receipt paths
-    fetch(`{{ route('Clearance.getReceipts', ['applicationId' => ':applicationId']) }}`.replace(':applicationId',
-            applicationId), {
-            method: 'GET',
-            headers: {
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                'Accept': 'application/json',
-            }
-        })
-        .then(response => {
-            if (!response.ok) {
-                return response.json().then(errData => {
-                    throw new Error(errData.message || `Network response was not ok (${response.status})`);
-                });
-            }
-            return response.json();
-        })
-        .then(data => {
-            console.log('Receipt data:', data);
-            if (data.success) {
-                const receipts = data.data; // Access 'data' object
-
-                // Load the receipts into the containers
-                if (receipts.library_receipt_path) {
-                    document.getElementById('libraryReceiptContainer').innerHTML =
-                        `<embed src="${receipts.library_receipt_url}" type="application/pdf" width="100%" height="500px" />`;
-                } else {
-                    document.getElementById('libraryReceiptContainer').innerHTML =
-                        `<p>No Library Receipt Available.</p>`;
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(errData => {
+                        throw new Error(errData.message ||
+                            `Network response was not ok (${response.status})`);
+                    });
                 }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Receipt data:', data);
+                if (data.success) {
+                    const receipts = data.data; // Access 'data' object
 
-                if (receipts.hostel_receipt_path) {
-                    document.getElementById('hostelReceiptContainer').innerHTML =
-                        `<embed src="${receipts.hostel_receipt_url}" type="application/pdf" width="100%" height="500px" />`;
+                    // Load the receipts into the containers
+                    if (receipts.library_receipt_path) {
+                        document.getElementById('libraryReceiptContainer').innerHTML =
+                            `<embed src="${receipts.library_receipt_url}" type="application/pdf" width="100%" height="500px" />`;
+                    } else {
+                        document.getElementById('libraryReceiptContainer').innerHTML =
+                            `<p>No Library Receipt Available.</p>`;
+                    }
+
+                    if (receipts.hostel_receipt_path) {
+                        document.getElementById('hostelReceiptContainer').innerHTML =
+                            `<embed src="${receipts.hostel_receipt_url}" type="application/pdf" width="100%" height="500px" />`;
+                    } else {
+                        document.getElementById('hostelReceiptContainer').innerHTML =
+                            `<p>No Hostel Receipt Available.</p>`;
+                    }
+
+                    // Display the modal
+                    document.getElementById('receiptModal').style.display = 'block';
                 } else {
-                    document.getElementById('hostelReceiptContainer').innerHTML =
-                        `<p>No Hostel Receipt Available.</p>`;
+                    alert('Error: ' + (data.message || 'Unknown error occurred'));
                 }
-
-                // Display the modal
-                document.getElementById('receiptModal').style.display = 'block';
-            } else {
-                alert('Error: ' + (data.message || 'Unknown error occurred'));
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('An error occurred: ' + error.message);
-        });
-}
-
-
-function closeModal(modalId) {
-    document.getElementById(modalId).style.display = 'none';
-}
-
-// Close modal when clicking outside of the modal content
-window.onclick = function(event) {
-    const modal = document.getElementById('receiptModal');
-    if (event.target == modal) {
-        modal.style.display = "none";
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred: ' + error.message);
+            });
     }
-}
-</script>
+
+
+    function closeModal(modalId) {
+        document.getElementById(modalId).style.display = 'none';
+    }
+
+    // Close modal when clicking outside of the modal content
+    window.onclick = function(event) {
+        const modal = document.getElementById('receiptModal');
+        if (event.target == modal) {
+            modal.style.display = "none";
+        }
+    }
+    </script>
 
 
 
-<style>
+    <style>
     /* Modal Styles */
     .modal {
         display: none;
@@ -487,7 +496,7 @@ window.onclick = function(event) {
         border: none;
         cursor: pointer;
     }
-</style>
+    </style>
 
 </div>
 @endsection

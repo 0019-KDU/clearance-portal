@@ -209,15 +209,14 @@ Route::post('/clearance/{departmentId}/status/{statusId}/generate-pdf', [Clearan
 ->name('Clearance.generatePdf');
 
 
-Route::group(['middleware' => ['auth']], function () {
-    // Route for viewing Hostel PDF
+Route::middleware(['auth'])->group(function () {
     Route::get('clearance/pdf/hostel/{applicationId}', [ClearanceController::class, 'viewHostelPdf'])
         ->name('clearance.pdf.hostel');
 
-    // Route for viewing Library PDF
     Route::get('clearance/pdf/library/{applicationId}', [ClearanceController::class, 'viewLibraryPdf'])
         ->name('clearance.pdf.library');
 });
+
 Route::post('/student/upload-receipt', [StudentDashboardController::class, 'uploadReceipt'])
     ->name('student.uploadReceipt')
     ->middleware('auth');

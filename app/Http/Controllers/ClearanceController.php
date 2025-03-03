@@ -288,7 +288,7 @@ public function viewHostelPdf($applicationId)
                                 ->first();
     
             $hostelStatus = ApplicationStatus::where('application_id', $applicationId)
-                                ->where('department_id', 25)
+                                ->where('department_id', 16)
                                 ->first();
     
             // Debugging output

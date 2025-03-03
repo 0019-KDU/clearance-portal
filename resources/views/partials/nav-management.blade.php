@@ -78,7 +78,7 @@
     <nav class="navbar">
         <!-- Logo Section -->
         <div class="navbar-logo">
-            <img src="{{ asset('storage/images/crest.png') }}" alt="Logo">
+        <img src="{{ asset('images/KDU.png') }}" alt="KDU Logo" class="logo">
             <span>ADMIN PORTAL - CMS</span>
         </div>
 

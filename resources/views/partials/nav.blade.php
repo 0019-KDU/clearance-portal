@@ -31,21 +31,18 @@
         }
 
         .navbar-logo img {
-            height: 60px;
+            height: 80px;
             width: auto;
             margin-right: 15px; /* Space between logo and text */
-            vertical-align: middle;
         }
 
         .navbar-logo span {
             font-size: 24px;
             font-weight: bold;
-            vertical-align: middle;
         }
 
         .navbar-links {
             display: flex;
-            gap: 10px; /* Space between navbar items */
         }
 
         .navbar-item {
@@ -53,17 +50,13 @@
             text-decoration: none;
             padding: 14px 20px;
             font-size: 18px;
-            transition: background-color 0.3s ease, color 0.3s ease, transform 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            transition: background-color 0.5s ease, color 0.5s ease, transform 0.5s ease;
         }
 
         .navbar-item:hover {
             background-color: #2980b9;
             color: #ecf0f1;
             transform: scale(1.05);
-            border-radius: 4px;
         }
 
         .is-active {
@@ -84,16 +77,17 @@
 
         <!-- Navigation Links -->
         <div class="navbar-links">
-            <a href="{{ route('users.import-form') }}" class="navbar-item {{ Request::is('im*') ? 'is-active' : '' }}">
-                Import Users
+            <a href="{{ route('clearance.graph') }}" class="navbar-item {{ Request::is('clearance-graph*') ? 'is-active' : '' }}">
+                Clearance Reports
             </a>
-            <a href="{{ route('departments.manage') }}" class="navbar-item {{ Request::is('manage*') ? 'is-active' : '' }}">
-                Add/Delete Department 
+            <a href="{{ route('status.chart') }}" class="navbar-item {{ Request::is('status-chart*') ? 'is-active' : '' }}">
+                Status Reports
             </a>
-            <a href="{{ route('departments.add') }}" class="navbar-item {{ Request::is('add*') ? 'is-active' : '' }}">
-                Add Staff
+          
+            <a href="{{ route('duration.chart') }}" class="navbar-item {{ Request::is('duration-chart*') ? 'is-active' : '' }}">
+                Duration Reports
             </a>
-            <a href="{{ route('departments.profile') }}" class="navbar-item {{ Request::is('user*') ? 'is-active' : '' }}">
+            <a href="{{ route('user.profile') }}" class="navbar-item {{ Request::is('user.profile*') ? 'is-active' : '' }}">
                 Profile
             </a>
         </div>

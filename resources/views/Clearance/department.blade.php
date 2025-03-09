@@ -62,10 +62,10 @@
                 <div class="button-group">
                     <!-- PDF View Buttons on the Left -->
                     <div class="pdf-view-buttons">
-                    @if(in_array(auth()->user()->dep_id, [12, 16]))
-                     <button type="button" class="btn btn-pdf" onclick="generatePdf('{{ $status->id }}')">Generate PDF</button>
+                        @if(in_array(auth()->user()->dep_id, [12, 16]))
+                        <button type="button" class="btn btn-pdf" onclick="generatePdf('{{ $status->id }}')">Generate
+                            PDF</button>
                         @endif
-                        
 
                         @if(auth()->user()->dep_id == 13)
                         <button type="button" class="btn btn-hostel-pdf"
@@ -138,21 +138,6 @@
     </div>
 </div>
 
-<!-- Generate PDF Modal -->
-<!-- Generate PDF Modal -->
-<div id="pdfModal" class="modal">
-    <div class="modal-content">
-        <span class="close" onclick="closeModal('pdfModal')">&times;</span>
-        <h3>Enter Reason for PDF Generation</h3>
-        <textarea id="pdfReason" rows="4" placeholder="Enter reason here..."></textarea>
-        <button id="submitPdfBtn">Generate PDF</button>
-
-        <!-- Message Display -->
-        <div id="pdfMessage" style="display: none; margin-top: 15px; padding: 10px; border-radius: 5px;"></div>
-    </div>
-</div>
-
-
 <!-- Decline Reason Modal -->
 <div id="declineModal" class="modal">
     <div class="modal-content">
@@ -186,7 +171,6 @@
         <div id="hostelReceiptContainer">
         </div>
     </div>
-
 
 
 
@@ -324,72 +308,64 @@
 
         closeModal("declineModal"); // Close the reason input modal
     });
-////////////////////////////////
-let selectedStatusId = null;
 
-function generatePdf(statusId) {
-    selectedStatusId = statusId; // Store the status ID globally
-    document.getElementById('pdfModal').style.display = 'block'; // Show the modal
-    document.getElementById('pdfMessage').style.display = 'none'; // Hide any previous message
-}
+    function generatePdf(statusId) {
+        console.log("Generate PDF button clicked for status ID:", statusId);
 
-// Function to close modal
-function closeModal(modalId) {
-    document.getElementById(modalId).style.display = 'none';
-}
-
-// Function to display messages inside the modal
-function showMessage(message, type) {
-    let messageBox = document.getElementById('pdfMessage');
-    messageBox.style.display = 'block';
-    messageBox.innerHTML = message;
-    messageBox.style.backgroundColor = type === 'success' ? '#d4edda' : '#f8d7da';
-    messageBox.style.color = type === 'success' ? '#155724' : '#721c24';
-    messageBox.style.border = type === 'success' ? '1px solid #c3e6cb' : '1px solid #f5c6cb';
-}
-
-// Event listener for submitting the PDF request
-document.getElementById('submitPdfBtn').addEventListener('click', function () {
-    let pdfReason = document.getElementById('pdfReason').value.trim();
-
-    if (!pdfReason) {
-        showMessage("Please enter a reason for generating the PDF.", "error");
-        return;
-    }
-
-    let csrfToken = document.querySelector('meta[name="csrf-token"]');
-    if (!csrfToken) {
-        showMessage("CSRF token not found. Please check your layout file.", "error");
-        return;
-    }
-
-    let formData = new FormData();
-    formData.append('_token', csrfToken.getAttribute('content'));
-    formData.append('pdf_reason', pdfReason);
-
-    fetch(`/clearance/generatePdf/${selectedStatusId}`, {
-        method: 'POST',
-        body: formData,
-        headers: {
-            'X-CSRF-TOKEN': csrfToken.getAttribute('content'),
-            'Accept': 'application/json',
+        var csrfToken = document.querySelector('meta[name="csrf-token"]');
+        if (!csrfToken) {
+            alert("CSRF token not found. Please check your layout file.");
+            return;
         }
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            showMessage("PDF generated successfully.", "success");
-            setTimeout(() => closeModal('pdfModal'), 2000); // Close after 2 seconds
-        } else {
-            showMessage('Error: ' + (data.message || 'Unknown error occurred'), "error");
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        showMessage('An error occurred. Please try again.', "error");
-    });
-});
 
+        // Prompt the user for additional information or reasons
+        var pdfReason = prompt("Please enter the reason or information for the PDF:");
+        if (pdfReason == null || pdfReason.trim() === "") {
+            console.log("PDF generation cancelled or no reason provided.");
+            return; // Exit if no reason provided
+        }
+
+        console.log("Reason provided for PDF:", pdfReason);
+
+        // Prepare the data to send
+        var formData = new FormData();
+        formData.append('_token', csrfToken.getAttribute('content'));
+        formData.append('pdf_reason', pdfReason);
+
+        // Make the fetch request
+        fetch(`{{ route('Clearance.generatePdf', ['departmentId' => auth()->user()->dep_id, 'statusId' => ':statusId']) }}`
+                .replace(':statusId', statusId), {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-CSRF-TOKEN': csrfToken.getAttribute('content'),
+                        'Accept': 'application/json',
+                    }
+                })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(errData => {
+                        throw new Error(errData.message ||
+                            `Network response was not ok (${response.status})`);
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Response data:', data);
+                if (data.success) {
+                    alert(data.message);
+                    // Optionally, provide a link to view the PDF
+                    // location.reload(); // Reload the page if needed
+                } else {
+                    alert('Error: ' + (data.message || 'Unknown error occurred'));
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred: ' + error.message);
+            });
+    }
 
     function viewGeneratedPdf(applicationId, departmentId) {
         console.log("Fetching PDF for Application:", applicationId, "Department:", departmentId);

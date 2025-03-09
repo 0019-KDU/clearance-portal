@@ -21,8 +21,13 @@ class ApplicationStatus extends Model
         'created_by',
         'updated_by',
         'receipt_path',
-        'service_number'
+        'service_number',
+   
     ];
+    protected $casts = [
+        'receipt_paths' => 'array',
+    ];
+    
     public function application()
     {
         return $this->belongsTo(Application::class);

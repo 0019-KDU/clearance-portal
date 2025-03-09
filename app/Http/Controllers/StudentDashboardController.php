@@ -178,80 +178,32 @@ $allApproved = collect($departmentStatuses)->every(function ($status) {
      }
 
      public function uploadReceipt(Request $request)
-     {
-         $request->validate([
-             'department_id' => 'required|exists:departments,id',
-             'receipt' => 'required|file|mimes:pdf,jpg,jpeg,png|max:2048', // Restrict file types and size
-         ]);
-     
-         $user = Auth::user();
-     
-         // Check if user is authenticated
-         if (!$user) {
-             Log::warning('Unauthenticated user attempted to upload a receipt.');
-             return back()->withErrors('User not authenticated.');
-         }
-     
-         // Retrieve the student's information
-         $studentInfo = StudentInfo::where('user_id', $user->id)->first();
-     
-         if (!$studentInfo) {
-             Log::error('StudentInfo not found for user.', ['user_id' => $user->id]);
-             return back()->withErrors('Student information not found.');
-         }
-     
-         // Check if the user has an associated application
-         $application = Application::where('student_id', $studentInfo->id)->first();
-     
-         if (!$application) {
-             Log::error('Application not found for student.', ['student_id' => $studentInfo->id]);
-             return back()->withErrors('No associated application found for the user.');
-         }
-     
-         $departmentId = $request->input('department_id');
-         $file = $request->file('receipt');
-     
-         // Ensure the department is associated with the application
-         $applicationStatus = ApplicationStatus::where('department_id', $departmentId)
-             ->where('application_id', $application->id)
-             ->first();
-     
-         if (!$applicationStatus) {
-             Log::error('ApplicationStatus not found.', [
-                 'department_id' => $departmentId,
-                 'application_id' => $application->id,
-                 'user_id' => $user->id,
-             ]);
-             return back()->withErrors('Application status not found for the specified department.');
-         }
-     
-         // Handle existing receipt (optional: allow replacement)
-         if ($applicationStatus->receipt_path) {
-             // Optionally delete the old receipt
-             Storage::disk('public')->delete($applicationStatus->receipt_path);
-         }
-     
-         // Save the receipt with a unique name
-         try {
-             $filename = 'receipt_' . $application->id . '' . $departmentId . '' . time() . '.' . $file->getClientOriginalExtension();
-             $path = $file->storeAs('receipts', $filename, 'public');
-         } catch (\Exception $e) {
-             Log::error('Failed to store receipt.', ['error' => $e->getMessage()]);
-             return back()->withErrors('Failed to upload the receipt. Please try again.');
-         }
-     
-         // Update the application_status record with the receipt path
-         $applicationStatus->receipt_path = $path;
-         $applicationStatus->updated_by = $user->id;
-     
-         try {
-             $applicationStatus->save();
-         } catch (\Exception $e) {
-             Log::error('Failed to save ApplicationStatus.', ['error' => $e->getMessage()]);
-             return back()->withErrors('Failed to update application status. Please try again.');
-         }
-     
-         return back()->with('success', 'Receipt uploaded successfully.');
-     }
+{
+    $request->validate([
+        'department_id' => 'required|exists:departments,id',
+        'receipt' => 'required|file|mimes:pdf,jpg,jpeg,png|max:2048',
+    ]);
+
+    $user = Auth::user();
+    $studentInfo = StudentInfo::where('user_id', $user->id)->first();
+    $application = Application::where('student_id', $studentInfo->id)->first();
+
+    $applicationStatus = ApplicationStatus::where('department_id', $request->department_id)
+        ->where('application_id', $application->id)
+        ->firstOrFail();
+
+    // Store the uploaded file
+    $filename = 'receipt_' . $application->id . '_' . $request->department_id . '_' . time() . '.' . $request->file('receipt')->getClientOriginalExtension();
+    $path = $request->file('receipt')->storeAs('receipts', $filename, 'public');
+
+    // Append the new path to the existing array
+    $receiptPaths = $applicationStatus->receipt_paths ?? [];
+    $receiptPaths[] = $path;
+    $applicationStatus->receipt_paths = $receiptPaths;
+
+    $applicationStatus->save();
+
+    return back()->with('success', 'Receipt uploaded successfully.');
+}
      
 }

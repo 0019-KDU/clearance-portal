@@ -142,7 +142,7 @@ use Illuminate\Support\Facades\Storage;
                         @php
                         // Determine the route based on department
                         $departmentName = strtolower($status->department->dep_name);
-                        $routeName = $departmentName === 'hostel' ? 'clearance.pdf.hostel' :
+                        $routeName = $departmentName === 'hostal' ? 'clearance.pdf.hostel' :
                         'clearance.pdf.library';
                         $applicationId = $status->application_id ?? $status->id;
                         @endphp
@@ -176,11 +176,12 @@ use Illuminate\Support\Facades\Storage;
                                 </button>
                             </div>
                         </form>
-
-                        @elseif($status->receipt_path)
-                        <a href="{{ Storage::url($status->receipt_path) }}" target="_blank">
-                            <i class="fas fa-file-upload"></i> View Receipt
+                        @elseif(!empty($status->receipt_paths))
+                        @foreach ($status->receipt_paths as $receipt)
+                        <a href="{{ Storage::url($receipt) }}" target="_blank" class="receipt-link">
+                            <i class="fas fa-file-upload"></i> View Receipt {{ $loop->iteration }}
                         </a>
+                        @endforeach
                         @else
                         Pending Upload
                         @endif

@@ -280,49 +280,38 @@ public function viewHostelPdf($applicationId)
     
 
     public function getReceipts(Request $request, $applicationId)
-    {
-        try {
-            // Fetch the ApplicationStatus entries for Library and Hostel
-            $libraryStatus = ApplicationStatus::where('application_id', $applicationId)
-                                ->where('department_id', 12)
-                                ->first();
-    
-            $hostelStatus = ApplicationStatus::where('application_id', $applicationId)
-                                ->where('department_id', 25)
-                                ->first();
-    
-            // Debugging output
-            Log::info('Library Status:', ['libraryStatus' => $libraryStatus]);
-            Log::info('Hostel Status:', ['hostelStatus' => $hostelStatus]);
-    
-            if (!$libraryStatus && !$hostelStatus) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'No receipt information found for this application.',
-                ], 404);
+{
+    try {
+        // Fetch all application statuses for this application
+        $statuses = ApplicationStatus::where('application_id', $applicationId)
+                        ->with('department')
+                        ->get();
+
+        $receiptData = [];
+        
+        foreach ($statuses as $status) {
+            if ($status->receipt_paths) {
+                $departmentName = strtolower($status->department->dep_name);
+                $receiptData[$departmentName] = [
+                    'paths' => $status->receipt_paths,
+                    'urls' => array_map(function($path) {
+                        return Storage::url($path);
+                    }, $status->receipt_paths)
+                ];
             }
-    
-            // Prepare the response data
-            $data = [
-                'library_receipt_path' => $libraryStatus->receipt_path ?? null,
-                'hostel_receipt_path' => $hostelStatus->receipt_path ?? null,
-                'library_receipt_url' => $libraryStatus && $libraryStatus->receipt_path ? Storage::url($libraryStatus->receipt_path) : null,
-                'hostel_receipt_url' => $hostelStatus && $hostelStatus->receipt_path ? Storage::url($hostelStatus->receipt_path) : null,
-            ];
-    
-            Log::info('Receipts Data:', ['data' => $data]);
-    
-            return response()->json([
-                'success' => true,
-                'data' => $data,
-            ]);
-    
-        } catch (\Exception $e) {
-            Log::error('Error fetching receipts:', ['message' => $e->getMessage()]);
-            return response()->json([
-                'success' => false,
-                'message' => 'An error occurred while fetching the receipts.',
-            ], 500);
         }
+
+        return response()->json([
+            'success' => true,
+            'data' => $receiptData
+        ]);
+
+    } catch (\Exception $e) {
+        Log::error('Error fetching receipts:', ['message' => $e->getMessage()]);
+        return response()->json([
+            'success' => false,
+            'message' => 'An error occurred while fetching receipts.',
+        ], 500);
     }
+}
 }

@@ -10,8 +10,10 @@
 
 body {
   margin: 0;
-  margin-top: 100px; /* Adjusted for fixed navbar */
+  margin-top: 100px;
   font-family: var(--text);
+  padding: 0;
+  overflow-x: hidden;
 }
 
 .navbar-container {
@@ -21,7 +23,7 @@ body {
   width: 100%;
   top: 0;
   z-index: 1000;
-  background-color: #ffffff; /* Ensure navbar has a background */
+  background-color: #ffffff;
 }
 
 /* Container Styling */
@@ -45,12 +47,25 @@ body {
   font-weight: 600;
 }
 
-/* Form Container with Flexbox for Button Alignment */
+/* Form Container with Flexbox */
 .form-container {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
+  gap: 20px;
   flex-wrap: wrap;
+}
+
+/* Left Column Styling */
+.left-column {
+  flex: 1;
+  min-width: 250px;
+}
+
+/* Right Column Styling */
+.right-column {
+  flex: 1;
+  min-width: 250px;
 }
 
 /* User Name Label Styling */
@@ -60,7 +75,7 @@ body {
   font-size: 1.8rem;
   color: #6699ff;
   padding-bottom: 0;
-  line-height: 1.2; /* Adjust line height for spacing */
+  line-height: 1.2;
   display: flex;
   align-items: baseline;
 }
@@ -70,7 +85,7 @@ body {
   margin-top: 0;
   font-weight: 500;
   margin-left: 20px;
-  line-height: 0; /* Keep consistent with label */
+  line-height: 0;
 }
 
 /* Card Styling */
@@ -80,19 +95,10 @@ body {
   background-color: #f8f9fa;
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
   margin-bottom: 30px;
+  overflow: hidden;
 }
 
 /* Card Header Styling */
-/* .card-header{
-  background-color: #0055ff;
-  color: #ffffff;
-  padding: 20px;
-  font-size: 1.5rem;
-  font-weight: 600;
-  text-align: center;
-  border-radius: 12px 12px 0 0;
-} */
-
 .card .card-header {
   background-color: var(--mainColor) !important;
   color: #ffffff !important;
@@ -105,10 +111,7 @@ body {
 
 /* Card Body Styling */
 .card-body {
-  padding-top: 30px !important;
-  padding-left: 20px;
-  padding-right: 30px;
-  padding-bottom: 10px!important;
+  padding: 30px 20px 10px 20px !important;
 }
 
 /* Form Group Styling */
@@ -120,7 +123,7 @@ body {
 .form-group label {
   font-size: 1.1rem;
   color: #333333;
-  margin-bottom: 0px;
+  margin-bottom: 8px;
   display: block;
   font-weight: 500 !important;
 }
@@ -131,6 +134,8 @@ body {
   font-size: 1rem;
   border: 1px solid #ced4da;
   transition: border-color 0.3s ease;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .form-control:focus {
@@ -139,32 +144,35 @@ body {
   outline: none;
 }
 
+input[readonly] {
+  background-color: #e9ecef;
+  cursor: not-allowed;
+}
+
 /* Button Styling */
 .btn-primary {
   background-color: #47fa00 !important;
   border: none;
-  padding: 10px 25px !important;
+  padding: 12px 25px !important;
   font-size: 1.1rem !important;
   font-weight: 600 !important;
   color: #ffffff;
   border-radius: 8px !important;
   transition: background-color 0.3s ease !important;
-  width: auto !important; /* Adjust width */
+  width: auto !important;
   display: block !important;
-  margin-left: auto !important; /* Align right */
-  margin-bottom: 18px!important;
+  margin-left: auto !important;
+  margin-bottom: 18px !important;
+  cursor: pointer;
 }
 
 .btn-primary:hover {
   background-color: #56d80a !important;
-  cursor: pointer !important;
-  margin-bottom: 18px !important;
 }
 
 .btn-primary:disabled {
   background-color: #6c757d !important;
   cursor: not-allowed !important;
-  margin-bottom: 18px !important;
   border-color: #6c757d !important;
 }
 
@@ -179,14 +187,15 @@ body {
   color: #ffffff;
   border-radius: 8px !important;
   transition: background-color 0.3s ease !important;
-  width: auto !important; /* Adjust width */
-  margin-left: auto !important; /* Align right */
-  margin-bottom: 0!important;
+  width: auto !important;
+  margin-left: auto !important;
+  margin-bottom: 0 !important;
   margin-top: 10px !important;
+  display: inline-block;
 }
 
 .downloadButton:hover {
-  background-color: #56d80a !important; /* Darker green on hover */
+  background-color: #56d80a !important;
   cursor: pointer;
 }
 
@@ -194,22 +203,31 @@ body {
   background-color: #6c757d !important;
   cursor: not-allowed !important;
   margin-bottom: 0;
-  margin-top: 0px !important;
+  margin-top: 10px !important;
   border: none;
-  padding: 10px 33px !important;
+  padding: 12px 33px !important;
   font-size: 1.1rem !important;
   text-decoration: none;
   font-weight: 600 !important;
   color: #ffffff;
   border-radius: 8px;
-  width: auto !important; /* Adjust width */
+  width: auto !important;
   margin-left: auto;
+  display: inline-block;
 }
 
+/* Button Container Styling */
+.button-container {
+  text-align: right;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+}
 
 /* Success Message Styling */
 .alert-success {
-  background: #a1f87f ;
+  background: #a1f87f;
   color: #3c763d;
   border: 1px solid #3c763d;
   border-radius: 8px;
@@ -223,6 +241,7 @@ body {
   margin-top: 20px;
   width: 100%;
   border-collapse: collapse;
+  font-size: 0.9rem;
 }
 
 .table thead {
@@ -231,15 +250,17 @@ body {
 }
 
 .table thead th {
-  font-size: 1.1rem;
-  padding: 15px;
+  font-size: 1rem;
+  padding: 12px 8px;
   text-align: left;
+  white-space: nowrap;
 }
 
 .table tbody td {
-  font-size: 1rem;
-  padding: 15px;
+  font-size: 0.9rem;
+  padding: 12px 8px;
   border-bottom: 1px solid #dee2e6;
+  word-wrap: break-word;
 }
 
 .table-hover tbody tr:hover {
@@ -266,79 +287,424 @@ body {
   font-weight: bold;
 }
 
-/* Additional Status */
 .status-hidden {
   color: #6c757d;
   font-style: italic;
 }
 
-/* Button Container Styling */
-.button-container {
-  text-align: right;
-}
-
 /* Status Box Styling */
 .status-box {
   display: inline-block;
-  padding: 5px 10px;
-  border-radius: 20px;
+  padding: 4px 8px;
+  border-radius: 15px;
   color: #ffffff;
   font-weight: bold;
   text-align: center;
+  font-size: 0.8rem;
+  white-space: nowrap;
 }
 
 .status-pending .status-box {
-  background-color: #ffc107; /* Yellow for Pending */
-  color: #000000; /* Black text for better readability */
+  background-color: #ffc107;
+  color: #000000;
 }
 
 .status-rejected .status-box {
-  background-color: #dc3545; /* Red for Rejected */
+  background-color: #dc3545;
 }
 
 .status-approved .status-box {
-  background-color: #28a745; /* Green for Approved */
+  background-color: #28a745;
 }
 
 .status-hidden .status-box {
-  background-color: #6c757d; /* Gray for Hidden */
+  background-color: #6c757d;
   color: #ffffff;
 }
-/* Flexbox Container */
-.form-container {
+
+/* File Upload Styling */
+.input-group {
   display: flex;
-  justify-content: space-between;
-  align-items: flex-start; /* Align items to the top */
-  gap: 20px; /* Space between columns */
+  gap: 5px;
+  align-items: center;
+  flex-wrap: wrap;
 }
 
-/* Left Column Styling */
-.left-column {
-  flex: 1; /* Take up remaining space */
+.input-group input[type="file"] {
+  flex: 1;
+  min-width: 120px;
+  font-size: 0.8rem;
 }
 
-/* Right Column Styling */
-.right-column {
-  flex: 1; /* Take up remaining space */
+.btn-sm {
+  padding: 4px 8px;
+  font-size: 0.8rem;
+  white-space: nowrap;
 }
 
-/* Input Field Styling */
-.right-column .form-group {
-  margin-bottom: 15px;
+.receipt-link {
+  display: inline-block;
+  margin: 2px 0;
+  font-size: 0.8rem;
+  text-decoration: none;
+  color: #007bff;
 }
 
-.right-column .form-control {
-  width: 100%; /* Ensure inputs take up full width */
-  box-sizing: border-box; /* Include padding and border in width */
-}
-input[readonly] {
-  background-color: #e9ecef; /* Light gray background */
-  cursor: not-allowed; /* Indicate that editing is not allowed */
+.receipt-link:hover {
+  text-decoration: underline;
 }
 
+/* Modal Styling */
+#pdfModal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.8);
+  z-index: 9999;
+}
+
+#pdfModal > div {
+  position: relative;
+  width: 90%;
+  height: 90%;
+  margin: 2.5% auto;
+  background: #fff;
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+#closeModal {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: #dc3545;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  cursor: pointer;
+  border-radius: 4px;
+  z-index: 10000;
+}
+
+#pdfIframe {
+  width: 100%;
+  height: 100%;
+}
+
+/* Desktop Only Elements */
+.desktop-only {
+  display: table-cell;
+}
+
+.mobile-only {
+  display: none;
+}
+
+/* Mobile Responsive Styles */
 @media (max-width: 768px) {
+  /* Hide sidebar elements */
+  .sidebar,
+  .widget-area,
+  .secondary-sidebar,
+  #secondary,
+  .right-sidebar,
+  .left-sidebar {
+    display: none !important;
+  }
+  
+  /* Make main content full width */
+  .main-content,
+  .content-area,
+  .primary-content {
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 10px !important;
+  }
+  
+  body {
+    margin-top: 80px;
+  }
+  
+  .container {
+    margin-top: 100px;
+    padding: 15px;
+    border-radius: 10px;
+    margin-left: 10px;
+    margin-right: 10px;
+  }
+  
+  .dashboard-title {
+    font-size: 1.8rem;
+    margin-bottom: 20px;
+  }
+  
   .form-container {
-      flex-direction: column;
-      gap: 10px;
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .left-column,
+  .right-column {
+    width: 100%;
+    min-width: unset;
+  }
+  
+  .user-name-label {
+    font-size: 1.4rem;
+    margin-left: 10px;
+    text-align: center;
+    justify-content: center;
+  }
+  
+  .form-value {
+    margin-left: 10px;
+    text-align: center;
+    font-size: 0.9rem;
+  }
+  
+  .card .card-header {
+    font-size: 1.2rem !important;
+    padding: 12px !important;
+  }
+  
+  .card-body {
+    padding: 20px 15px 10px 15px !important;
+  }
+  
+  .form-group {
+    margin-bottom: 20px;
+  }
+  
+  .form-group label {
+    font-size: 1rem;
+    margin-bottom: 5px;
+  }
+  
+  .form-control {
+    padding: 10px;
+    font-size: 0.9rem;
+  }
+  
+  .btn-primary,
+  .downloadButton,
+  .downloadButtonDisable {
+    width: 100% !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    padding: 12px 20px !important;
+    font-size: 1rem !important;
+    text-align: center;
+  }
+  
+  .button-container {
+    text-align: center;
+    align-items: center;
+  }
+  
+  /* Hide desktop-only elements */
+  .desktop-only {
+    display: none !important;
+  }
+  
+  .mobile-only {
+    display: block !important;
+  }
+  
+  /* Table Responsive - Card Layout */
+  .table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .mobile-card-layout .table,
+  .mobile-card-layout thead,
+  .mobile-card-layout tbody,
+  .mobile-card-layout th,
+  .mobile-card-layout td,
+  .mobile-card-layout tr {
+    display: block;
+  }
+  
+  .mobile-card-layout thead tr {
+    position: absolute;
+    top: -9999px;
+    left: -9999px;
+  }
+  
+  .mobile-card-layout tr {
+    border: 1px solid #ddd;
+    margin-bottom: 15px;
+    padding: 15px;
+    border-radius: 8px;
+    background: #fff;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+  
+  .mobile-card-layout td {
+    border: none;
+    padding: 8px 0;
+    position: relative;
+    padding-left: 40%;
+    text-align: left;
+  }
+  
+  .mobile-card-layout td:before {
+    content: attr(data-label) ": ";
+    position: absolute;
+    left: 6px;
+    width: 35%;
+    padding-right: 10px;
+    white-space: nowrap;
+    font-weight: bold;
+    color: #333;
+    text-align: left;
+  }
+  
+  /* Hide specific columns on mobile */
+  .table th:nth-child(3),
+  .table td:nth-child(3),
+  .table th:nth-child(4),
+  .table td:nth-child(4),
+  .table th:nth-child(5),
+  .table td:nth-child(5) {
+    display: none;
+  }
+  
+  .status-box {
+    font-size: 0.7rem;
+    padding: 2px 6px;
+  }
+  
+  .input-group {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .input-group input[type="file"] {
+    width: 100%;
+    margin-bottom: 5px;
+  }
+  
+  .btn-sm {
+    width: 100%;
+    padding: 8px 12px;
+    font-size: 0.9rem;
+  }
+  
+  .receipt-link {
+    display: block;
+    margin: 5px 0;
+    font-size: 0.8rem;
+  }
+  
+  /* Modal Mobile Adjustments */
+  #pdfModal > div {
+    width: 95%;
+    height: 85%;
+    margin: 5% auto;
+  }
+  
+  #closeModal {
+    padding: 10px 15px;
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 10px;
+    margin: 90px 5px 20px 5px;
+  }
+  
+  .dashboard-title {
+    font-size: 1.5rem;
+  }
+  
+  .user-name-label {
+    font-size: 1.2rem;
+    margin-left: 5px;
+  }
+  
+  .form-value {
+    margin-left: 5px;
+    font-size: 0.8rem;
+  }
+  
+  .card .card-header {
+    font-size: 1.1rem !important;
+    padding: 10px !important;
+  }
+  
+  .card-body {
+    padding: 15px 10px 10px 10px !important;
+  }
+  
+  .form-control {
+    padding: 8px;
+    font-size: 0.85rem;
+  }
+  
+  .btn-primary,
+  .downloadButton,
+  .downloadButtonDisable {
+    padding: 10px 15px !important;
+    font-size: 0.9rem !important;
+  }
+  
+  .mobile-card-layout td {
+    padding-left: 45%;
+  }
+  
+  .mobile-card-layout td:before {
+    width: 40%;
+  }
+  
+  .status-box {
+    font-size: 0.6rem;
+    padding: 1px 4px;
+  }
+}
+
+/* Landscape Mobile Adjustments */
+@media (max-width: 768px) and (orientation: landscape) {
+  .container {
+    margin-top: 80px;
+  }
+  
+  .form-container {
+    flex-direction: row;
+  }
+  
+  .left-column,
+  .right-column {
+    width: 48%;
+  }
+}
+
+/* Very Small Screens */
+@media (max-width: 320px) {
+  .container {
+    margin: 80px 2px 10px 2px;
+    padding: 8px;
+  }
+  
+  .dashboard-title {
+    font-size: 1.3rem;
+  }
+  
+  .user-name-label {
+    font-size: 1.1rem;
+  }
+  
+  .mobile-card-layout td {
+    padding-left: 50%;
+  }
+  
+  .mobile-card-layout td:before {
+    width: 45%;
+    font-size: 0.8rem;
   }
 }

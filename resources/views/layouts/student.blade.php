@@ -33,6 +33,7 @@
             align-items: center;
             height: 110px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transition: height 0.3s;
         }
 
         .logo {
@@ -70,6 +71,7 @@
             flex-direction: column;
             align-items: baseline;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            transition: left 0.3s, width 0.3s;
         }
 
         .sidebar ul {
@@ -134,6 +136,7 @@
             position: fixed;                      /* Fix position on the page */
             top: 110px;                           /* Align with the height of the navbar */
             left: 250px;                          /* Align next to the sidebar */
+            transition: left 0.3s;
         }
 
     
@@ -142,24 +145,133 @@
             margin-top: 110px; /* Offset the content by the navbar height */
             padding: 20px;
             width: 100%;
+            transition: margin-left 0.3s;
         }
 
+        /* Responsive styles */
+        @media (max-width: 900px) {
+            .navbar {
+                flex-direction: column;
+                align-items: flex-start;
+                height: auto;
+                padding-left: 10px;
+                padding-right: 10px;
+            }
+            .logo {
+                height: 60px;
+                padding-right: 10px;
+            }
+            .header-text h1 {
+                font-size: 1.1em;
+            }
+            .content {
+                margin-left: 0;
+                margin-top: 100px;
+                padding: 10px;
+            }
+        }
+        @media (max-width: 768px) {
+            .sidebar {
+                left: -260px;
+                width: 220px;
+                z-index: 2000;
+                box-shadow: 2px 0 8px rgba(0,0,0,0.15);
+                background: #f9f9f9;
+                position: fixed;
+                top: 110px;
+                height: calc(100vh - 110px);
+                transition: left 0.3s cubic-bezier(.4,0,.2,1);
+            }
+            .sidebar.active {
+                left: 0;
+            }
+            .sidebar-overlay {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100vw;
+                height: 100vh;
+                background: rgba(0,0,0,0.3);
+                z-index: 1999;
+                transition: opacity 0.3s;
+            }
+            .sidebar-overlay.active {
+                display: block;
+            }
+            .vertical-line {
+                left: -9999px;
+            }
+            .vertical-line.active {
+                left: 220px;
+            }
+            .content {
+                margin-left: 0;
+                margin-top: 100px;
+                padding: 10px;
+            }
+            .navbar .hamburger {
+                display: flex;
+            }
+        }
+        @media (max-width: 600px) {
+            .navbar {
+                flex-direction: column;
+                align-items: flex-start;
+                height: auto;
+                padding: 10px 5px;
+            }
+            .logo {
+                height: 40px;
+                padding-right: 5px;
+            }
+            .header-text h1 {
+                font-size: 0.95em;
+                line-height: 1.2;
+            }
+            .content {
+                margin-left: 0;
+                margin-top: 80px;
+                padding: 5px;
+            }
+        }
+        .hamburger {
+            display: none;
+            flex-direction: column;
+            cursor: pointer;
+            margin-left: auto;
+            margin-right: 10px;
+        }
+        .hamburger span {
+            height: 3px;
+            width: 25px;
+            background: var(--mainColor);
+            margin: 4px 0;
+            border-radius: 2px;
+            transition: 0.4s;
+        }
     </style>
 </head>
 <body>
 
     <!-- Top Navbar -->
     <nav class="navbar">
-        <div class="d-flex align-items-center">
+        <div class="d-flex align-items-center" style="width:100%">
             <img src="{{ asset('images/KDU.png') }}" alt="KDU Logo" class="logo">
             <div class="header-text">
                 <h1>Clearance Management <br>System - KDU</h1>
+            </div>
+            <div class="hamburger" id="sidebarHamburger" tabindex="0" aria-label="Toggle sidebar" aria-expanded="false">
+                <span></span>
+                <span></span>
+                <span></span>
             </div>
         </div>
     </nav>
 
     <!-- Sidebar with Buttons and Links -->
-    <div class="sidebar">
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+    <div class="sidebar" id="sidebarMenu">
         <ul>
             <li><b class="depName">Student Dashboard</b></li>
             <hr>
@@ -175,11 +287,10 @@
             </form>
             {{-- <li><a href="/page3" class="nav-link logout-btn">Logout</a></li> --}}
         </ul>
-
     </div>
 
     <!-- Vertical Line Between Sidebar and Content -->
-    <div class="vertical-line"></div>
+    <div class="vertical-line" id="verticalLine"></div>
 
     <!-- Content Section -->
     <div class="content">
@@ -187,5 +298,29 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+    // Hamburger toggle for sidebar with overlay
+    document.addEventListener('DOMContentLoaded', function() {
+        const hamburger = document.getElementById('sidebarHamburger');
+        const sidebar = document.getElementById('sidebarMenu');
+        const vline = document.getElementById('verticalLine');
+        const overlay = document.getElementById('sidebarOverlay');
+        function closeSidebar() {
+            sidebar.classList.remove('active');
+            vline.classList.remove('active');
+            overlay.classList.remove('active');
+        }
+        hamburger.addEventListener('click', function() {
+            sidebar.classList.toggle('active');
+            vline.classList.toggle('active');
+            overlay.classList.toggle('active');
+        });
+        overlay.addEventListener('click', closeSidebar);
+        // Optional: close sidebar on ESC key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') closeSidebar();
+        });
+    });
+    </script>
 </body>
 </html>

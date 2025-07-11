@@ -109,3 +109,52 @@ input[type="password"]:focus {
 .forgot-password a:hover {
   color: #4d79ff; /* Slightly darker color on hover */
 }
+
+@media (max-width: 900px) {
+  .center-container {
+    flex-direction: column !important;
+    min-width: 100vw !important;
+    align-items: stretch !important;
+    padding: 10px;
+  }
+  .form-wrapper {
+    min-width: 90vw !important;
+    max-width: 100vw;
+    padding: 1rem;
+    margin: 0 auto 20px auto;
+    box-sizing: border-box;
+  }
+  .side-image {
+    margin: 0 auto 20px auto;
+    max-width: 80vw;
+    display: block;
+  }
+}
+
+@media (max-width: 600px) {
+  .center-container {
+    min-width: 100vw !important;
+    padding: 0;
+  }
+  .form-wrapper {
+    min-width: 98vw !important;
+    padding: 0.5rem;
+    border-radius: 10px;
+  }
+  .form-title {
+    font-size: 1.3rem;
+  }
+  .side-image {
+    max-width: 95vw;
+    margin: 10px auto;
+  }
+  input[type="email"],
+  input[type="password"] {
+    font-size: 0.95rem;
+    padding: 0.5rem;
+  }
+  .submit-btn {
+    font-size: 1rem;
+    padding: 0.5rem;
+  }
+}

@@ -32,6 +32,7 @@
             align-items: center;
             height: 110px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transition: height 0.3s;
         }
 
         .logo {
@@ -57,7 +58,6 @@
             padding: 0;
         }
 
-    
         .content {
             margin-left: 250px;
             margin-top: 110px; /* Offset the content by the navbar height */
@@ -65,16 +65,82 @@
             width: 100%;
         }
 
+        /* Responsive styles */
+        @media (max-width: 900px) {
+            .navbar {
+                flex-direction: column;
+                align-items: flex-start;
+                height: auto;
+                padding-left: 10px;
+                padding-right: 10px;
+            }
+            .logo {
+                height: 60px;
+                padding-right: 10px;
+            }
+            .header-text h1 {
+                font-size: 1.1em;
+            }
+            .content {
+                margin-left: 0;
+                margin-top: 100px;
+                padding: 10px;
+            }
+        }
+        @media (max-width: 600px) {
+            .navbar {
+                flex-direction: column;
+                align-items: flex-start;
+                height: auto;
+                padding: 10px 5px;
+            }
+            .logo {
+                height: 40px;
+                padding-right: 5px;
+            }
+            .header-text h1 {
+                font-size: 0.95em;
+                line-height: 1.2;
+            }
+            .content {
+                margin-left: 0;
+                margin-top: 80px;
+                padding: 5px;
+            }
+            .navbar .hamburger {
+                display: block;
+            }
+        }
+        .hamburger {
+            display: none;
+            flex-direction: column;
+            cursor: pointer;
+            margin-left: auto;
+            margin-right: 10px;
+        }
+        .hamburger span {
+            height: 3px;
+            width: 25px;
+            background: white;
+            margin: 4px 0;
+            border-radius: 2px;
+            transition: 0.4s;
+        }
     </style>
 </head>
 <body>
 
     <!-- Top Navbar -->
     <nav class="navbar">
-        <div class="d-flex align-items-center">
+        <div class="d-flex align-items-center" style="width:100%">
             <img src="{{ asset('images/KDU.png') }}" alt="KDU Logo" class="logo">
             <div class="header-text">
                 <h1>Clearance Management <br>System - KDU</h1>
+            </div>
+            <div class="hamburger" id="navbarHamburger" tabindex="0" aria-label="Toggle navigation" aria-expanded="false">
+                <span></span>
+                <span></span>
+                <span></span>
             </div>
         </div>
     </nav>
@@ -86,5 +152,17 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+    // Hamburger toggle (if you add nav links in the future)
+    document.addEventListener('DOMContentLoaded', function() {
+        const hamburger = document.getElementById('navbarHamburger');
+        if (hamburger) {
+            hamburger.addEventListener('click', function() {
+                // Example: toggle a nav menu if present
+                // document.querySelector('.navbar-nav').classList.toggle('show');
+            });
+        }
+    });
+    </script>
 </body>
 </html>

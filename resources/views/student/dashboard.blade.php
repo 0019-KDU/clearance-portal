@@ -48,6 +48,7 @@ use Illuminate\Support\Facades\Storage;
                         <div class="form-group">
                             <span class="user-name-label">{{ $user->user_name }}</span>
                         </div>
+                        
                         <div class="form-group">
                             <span class="form-value">{{ $studentInfo->student_reg_no }}</span>
                         </div>
@@ -106,6 +107,7 @@ use Illuminate\Support\Facades\Storage;
 <div class="card mt-4">
     <div class="card-header">Application Status by Department</div>
     <div class="card-body">
+        <div class="table-responsive">
         <table class="table table-striped table-hover">
             <thead class="thead-dark">
                 <tr>
@@ -121,8 +123,8 @@ use Illuminate\Support\Facades\Storage;
             <tbody>
                 @foreach ($departmentStatuses as $status)
                 <tr>
-                    <td>{{ $status->department->dep_name }}</td>
-                    <td class="
+                    <td data-label="Department">{{ $status->department->dep_name }}</td>
+                    <td data-label="Status" class="
                                 {{ $status->status === 'PENDING' ? 'status-pending' : '' }}
                                 {{ $status->status === 'REJECTED' ? 'status-rejected' : '' }}
                                 {{ $status->status === 'APPROVED' ? 'status-approved' : '' }}
@@ -131,13 +133,13 @@ use Illuminate\Support\Facades\Storage;
                             {{ $status->status === 'HIDDEN' ? 'Status Hidden' : $status->status }}
                         </span>
                     </td>
-                    <td>{{ $status->reason }}</td>
-                    <td>{{ $status->updater->user_name ?? 'N/A' }}</td>
-                    <td>{{ $status->updater->service_number ?? 'N/A' }}</td>
+                    <td data-label="Reason">{{ $status->reason }}</td>
+                    <td data-label="Updated By">{{ $status->updater->user_name ?? 'N/A' }}</td>
+                    <td data-label="Service Number">{{ $status->updater->service_number ?? 'N/A' }}</td>
 
                     @if (in_array(strtolower($status->department->dep_name), ['library', 'hostal']))
                     {{-- PDF Column --}}
-                    <td>
+                    <td data-label="PDF">
                         @if($status->pdf_path)
                         @php
                         // Determine the route based on department
@@ -164,7 +166,7 @@ use Illuminate\Support\Facades\Storage;
                         </div>
                     </div>
 
-                    <td>
+                    <td data-label="Upload Receipt">
                         @if($status->status === 'APPROVED' || $status->status === 'REJECTED')
                         <form method="POST" action="{{ route('student.uploadReceipt') }}" enctype="multipart/form-data">
                             @csrf
@@ -188,14 +190,15 @@ use Illuminate\Support\Facades\Storage;
                     </td>
 
                     @else
-                    <td>N/A</td>
-                    <td>N/A</td>
+                    <td data-label="PDF">N/A</td>
+                    <td data-label="Upload Receipt">N/A</td>
                     @endif
 
                 </tr>
                 @endforeach
             </tbody>
         </table>
+        </div>
     </div>
 </div>
 @endif

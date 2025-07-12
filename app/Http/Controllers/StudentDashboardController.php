@@ -197,9 +197,9 @@ $allApproved = collect($departmentStatuses)->every(function ($status) {
     $path = $request->file('receipt')->storeAs('receipts', $filename, 'public');
 
     // Append the new path to the existing array
-    $receiptPaths = $applicationStatus->receipt_paths ?? [];
+    $receiptPaths = $applicationStatus->receipt_path ?? [];
     $receiptPaths[] = $path;
-    $applicationStatus->receipt_paths = $receiptPaths;
+    $applicationStatus->receipt_path = $receiptPaths;
 
     $applicationStatus->save();
 

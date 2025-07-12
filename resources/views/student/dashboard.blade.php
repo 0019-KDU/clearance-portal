@@ -88,16 +88,7 @@ use Illuminate\Support\Facades\Storage;
                 {{ $application ? 'Application Submitted' : 'Submit Clearance Form' }}
             </button>
 
-            @if ($allApproved)
-            <!-- Condition to check if all departments have approved -->
-            <a href="{{ route('student.downloadClearancePDF') }}" class="downloadButton" id="downloadButton">
-                Download Clearance
-            </a>
-            @else
-            <button class="downloadButtonDisable" id="downloadButton" disabled>
-                Download Clearance
-            </button>
-            @endif
+            
         </div>
         </form>
     </div>
@@ -178,8 +169,8 @@ use Illuminate\Support\Facades\Storage;
                                 </button>
                             </div>
                         </form>
-                        @elseif(!empty($status->receipt_paths))
-                        @foreach ($status->receipt_paths as $receipt)
+                        @elseif(!empty($status->receipt_path))
+                        @foreach ($status->receipt_path as $receipt)
                         <a href="{{ Storage::url($receipt) }}" target="_blank" class="receipt-link">
                             <i class="fas fa-file-upload"></i> View Receipt {{ $loop->iteration }}
                         </a>

@@ -8,9 +8,7 @@ use Illuminate\Support\Facades\DB;
 
 class DepartmentsTableSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
+
     public function run()
     {
         DB::table('departments')->insert([
@@ -18,7 +16,7 @@ class DepartmentsTableSeeder extends Seeder
                 'dep_name' => 'Student',
                 'email' => null,
                 'parent_department' => null,
-                'faculty_id' => null // Setting faculty_id as null
+                'faculty_id' => null 
             ],
             [
                 'dep_name' => 'Top level management',
@@ -111,7 +109,6 @@ class DepartmentsTableSeeder extends Seeder
                 'faculty_id' => null
             ],
 
-            ////////////////////////////////////////
             [
                 'dep_name' => 'AR_FDSS',
                 'email' => 'tharindumuramudali@gmail.com',

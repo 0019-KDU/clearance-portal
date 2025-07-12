@@ -78,7 +78,7 @@
                     <div class="approval-buttons">
                         @if(auth()->user()->dep_id == 15)
                         <!-- For dep_id = 15: Show Approve and Decline Buttons -->
-                        @if ($isEnlistment || ($isEnlistment && $status->allOthersApproved))
+                        @if ($isEnlistment && $status->allOthersApproved)
                         <!-- Approve Button (Enabled) -->
                         <form
                             action="{{ route('Clearance.update', ['departmentId' => auth()->user()->dep_id, 'statusId' => $status->id]) }}"
@@ -96,11 +96,9 @@
                         </div>
                         @endif
 
-                        <!-- Decline Button -->
-                        @if(!(auth()->user()->dep_id == 15))
-                        <button type="button" class="btn btn-decline"
-                            onclick="declineApplication('{{ $status->id }}')">Decline</button>
-                        @endif
+
+                        <!-- <button type="button" class="btn btn-decline"
+                            onclick="declineApplication('{{ $status->id }}')">Decline</button>  -->
 
                         @else
                         <!-- For Other Departments: Show Both Approve and Decline Buttons -->
